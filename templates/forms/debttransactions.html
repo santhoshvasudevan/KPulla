@@ -1,0 +1,39 @@
+<style>
+	table {
+	  font-family: arial, sans-serif;
+	  border-collapse: collapse;
+	  width: 100%;
+	}
+
+	td, th {
+	  border: 1px solid #dddddd;
+	  text-align: left;
+	  padding: 8px;
+	}
+
+	tr:nth-child(even) {
+	  background-color: #dddddd;
+	}
+</style>
+
+<table style="width:100%">
+	<tr>
+		<th>Name</th>
+		<th>Start Date</th>
+		<th>Amount Invested</th>
+		<th>Present Value</th>
+		<th>Interest Rate(%)</th>
+		<th>Maturity Date</th>
+	</tr>
+{% for t in trans %}
+	<tr>
+		<td>{{t.comments}}</td>
+		<td>{{t.start_date}}</td>
+		<td>{{t.Deposit_Amount}}</td>
+		<td>{{t.Deposit_value}}</td>
+		<td>{{t.interest_rate}}%</td>
+		<td>{{t.maturity_date}}</td>
+		<td><a class="btn btn-info" href="">Update</a> </td>
+	</tr>
+{% endfor %}
+</table>

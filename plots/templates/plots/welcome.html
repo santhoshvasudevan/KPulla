@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>KPulla</title>
+</head>
+{% load plotly_dash %}
+<script src = "https://cdn.plot.ly/plotly-latest.min.js"></script>
+<body>
+<h1>Home Page</h1>
+
+<div class="{% plotly_class name='board' %} card" style="height: 80%; width: 80%">
+	{% plotly_app name='board' ratio=0.65 %}
+	
+</div>
+
+<p>Show your talent here (wink)</p>
+</body>
+</html>

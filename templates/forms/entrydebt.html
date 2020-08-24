@@ -1,0 +1,56 @@
+<form action="/transdebt" method="POST">
+{% csrf_token %}
+<div class="form-row">
+  <div class="form-group col-md-8 col-lg-8">
+      <label for="Comments">Name</label>
+      <input type="text" class="form-control" id="Comments" placeholder="ABC Bank-2003" name="Comments">
+  </div>
+	<div class="form-group col-md-6 col-lg-6">
+    	<label for="start_date">Starting Date</label>
+    	<input type="date" class="form-control" id="start_date" name="date" placeholder="yyyy-mm-dd">
+	</div>
+  <div class="form-group col-md-6 col-lg-6">
+      <label for="DebtAmount">Deposit Amount</label>
+      <input type="number" class="form-control" id="Amount" placeholder="10000?" name="debt_amount">
+  </div>
+	<div class="form-group col-md-6 col-lg-6">
+    	<label for="rateofinterest">Interest Rate</label>
+    	<input type="number" step="0.01" class="form-control" id="roi" placeholder="3.5 for 3.5% per annum" name="rate_of_interest">
+  </div>
+  <!--
+	<div class="form-group col-md-8 col-lg-8">
+    	<label for="duration">Deposit Duration</label>
+    	<input type="number" step="0.01" class="form-control" id="duration" placeholder="1" name="duration">
+  </div>
+	<div class="form-group col-md-4 col-lg-4">
+		<fieldset id="duration">
+			<input type="radio" id="Years" name="termduration" value=1 checked>
+			<label for="Years">Years</label><br>
+			<input type="radio" id="Months" name="termduration" value=2>
+			<label for="Months">Months</label><br>
+			<input type="radio" id="Days" name="termduration" value=3>
+			<label for="Days">Days</label><br>
+		</fieldset>
+  </div>
+-->
+  <div class="form-group col-md-12 col-lg-12">
+    <label for="Compunding">Compounding</label>
+    <div class="input-group">
+      <fieldset id="Compounding">
+  		  <input type="radio" id="Yearly" name="Compounding" value=1 checked>
+  			<label for="Yearly">Yearly</label><br>
+  			<input type="radio" id="HalfYearly" name="Compounding" value=2>
+  			<label for="HalfYearly">Half Yearly</label><br>
+  			<input type="radio" id="Quarterly" name="Compounding" value=3>
+  			<label for="Quarterly">Quarterly</label>
+  			<input type="radio" id="Monthly" name="Compounding" value=4>
+  			<label for="Monthly">Monthly</label>
+  		</fieldset>
+    </div>
+  </div>
+
+</div>
+
+<button type="submit" class="btn btn-success">Submit</button>
+
+</form>

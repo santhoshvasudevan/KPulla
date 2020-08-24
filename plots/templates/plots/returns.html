@@ -1,0 +1,18 @@
+{%  extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% load plotly_dash %}
+<h1>Summary of Returns</h1>
+
+    <div class="{% plotly_class name='returnsboard' %} card" style="height: 100%; width: 100%">
+    {% plotly_app name='returnsboard' ratio=0.53 use_frameborder=1 %}
+    </div>
+
+
+    <div class="{% plotly_class name='returns_all' %} card" style="height: 100%; width: 100%">
+    {% plotly_app name='returns_all' ratio=0.53 use_frameborder=1 %}
+    </div>
+
+{% endblock %}
