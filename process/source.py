@@ -1,1 +1,1 @@
-quandlkey = '-x1w4pwjfrPL8iBabPL2'
+quandlkey = 'addyourquandlkey'
