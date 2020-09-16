@@ -64,8 +64,8 @@ def transdebt(request):
 		depositamount = request.POST.get('debt_amount')
 		start_date = request.POST.get('date')
 		rateofinterest = request.POST.get('rate_of_interest')
-		depositduration = request.POST.get('duration')
-		depositdurationtime = request.POST.get('termduration')
+		#depositduration = request.POST.get('duration')
+		#depositdurationtime = request.POST.get('termduration')
 		compounding = request.POST.get('Compounding')
 		commentname = request.POST.get('Comments')
 		#print(depositamount,start_date,rateofinterest,depositduration,depositdurationtime,compounding)
@@ -80,8 +80,8 @@ def transdebt(request):
 			Deposit_value = depositamount,
 			start_date = start_date,
 			interest_rate = rateofinterest,
-			deposit_duration = depositduration,
-			deposit_term = depositdurationtime,
+			#deposit_duration = depositduration,
+			#deposit_term = depositdurationtime,
 			compounding_term=compounding,
 			comments= commentname)
 	else:
