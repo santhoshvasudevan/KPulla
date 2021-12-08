@@ -11,6 +11,21 @@ Funds_Transac_Info = {
 			'Purchases': [('2019-8-9',100000),('2019-7-9',100000),('2019-10-9',100000),('2019-11-11',100000),('2019-12-9',100000),('2020-1-23',100000),('2020-3-2',100000),
 			('2019-2-3',100000),('2019-4-7',100000),('2019-5-4',100000),('2019-6-9',100000),('2019-7-6',100000),('2019-8-4',100000)]},
 }
+Funds_Transac_Info = {
+	1 : {'Scheme_Code': 122639,
+			'Purchases': [('2019-11-11',53000),('2020-1-23',113000),('2020-3-2',125000),('2019-10-9',50000)]},
+	2 : {'Scheme_Code': 120166,
+			'Purchases': [('2019-10-22',50000),('2019-11-11',51296),('2020-1-23',106000),('2020-3-2',125000)]},
+	3 : {'Scheme_Code': 120716,
+			'Purchases': [('2019-10-24',50000),('2019-11-11',51500),('2020-2-14',105408),('2020-3-2',125000)]},
+	4 : {'Scheme_Code': 143341,
+			'Purchases': [('2019-10-24',50000),('2019-11-11',50700),('2020-2-14',103040),('2020-3-2',100000)]},
+	5 : {'Scheme_Code': 120465,
+			'Purchases': [('2019-11-11',120000)]},
+	6 : {'Scheme_Code': 119062,
+			'Purchases': [('2019-11-04',104148.45)]},
+}
+
 class Command(BaseCommand):
 	help = 'Latest available information of funds are refreshed'
 	
@@ -48,6 +63,7 @@ class Command(BaseCommand):
 			entry.save()
 		self.stdout.write(self.style.SUCCESS('Funds Successfully Imported'))
 		self.stdout.write(self.style.SUCCESS('Adding available transactions...'))
+		Transactions.objects.all().delete()
 		for key in Funds_Transac_Info:
 			instance = get_object_or_404(Funds_DB, SchemeCode = Funds_Transac_Info[key]['Scheme_Code'])
 			for dt,amnt in Funds_Transac_Info[key]['Purchases']:

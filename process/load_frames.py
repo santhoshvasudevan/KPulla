@@ -2,17 +2,20 @@ from plots.models import Transactions,Funds_DB,debts
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import pandas as pd
+import requests, json
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta,date
 from dateutil import relativedelta
 import quandl
 from .source import *
 import os
+import pdb
 """
 Implement Offline and Online Data, just to avoid unnecessary download of data. Later that may help in offline database
 
 """
-
+source = 'mfapi'
+#source = 'quandl'
 
 #location = '/Users/santhoshvasudevan/Documents/WebDev/djangodash/'
 
@@ -57,9 +60,9 @@ def calc_debtvalue(Amount,name,roi,term,r):
 	return Date,Total_Value
 
 
-def fundsvalue():
+def fundsvalue(mode='Online'):
 	#Mode = 'Offline'
-	Mode = 'Online'
+	#Mode = 'Online'
 	quandl.ApiConfig.api_key = quandlkey
 	uniquecodes = Transactions.objects.values_list('AMFICode',flat = True).distinct()
 	Transaction_df_list = []
@@ -78,16 +81,36 @@ def fundsvalue():
 		transactions_df.set_index('Date',inplace= True)
 		Transaction_df_list.append(transactions_df)
 		quandlcode = 'AMFI/'+str(transactions_df['Scheme Code'].iloc[0])
+		mfapilink = 'https://api.mfapi.in/mf/'+str(transactions_df['Scheme Code'].iloc[0])
 		fname = quandlcode + '.csv'
 		filepath = os.path.join(settings.BASE_DIR,fname)
 
-		if Mode == 'Online':
-			start_date = transactions_df.index[0]
+		if mode == 'Online':
+			start_date = pd.to_datetime(transactions_df.index[0])
 			print('*************************************************************')
-			print('*************************************************************')
-			downloaded_df = quandl.get(quandlcode,start_date = start_date, end_date = date.today())
-			downloaded_df.drop(columns = ['Repurchase Price','Sale Price'],inplace = True)
+			
+			if source == 'quandl':
+				downloaded_df = quandl.get(quandlcode,start_date = start_date, end_date = date.today())
+				downloaded_df.drop(columns = ['Repurchase Price','Sale Price'],inplace = True)
+			elif source == 'mfapi':
+
+				end_date = pd.to_datetime('today')
+				webresponse = requests.get(mfapilink)
+				tmp = json.loads(webresponse.text)
+				req_data = pd.DataFrame.from_dict(tmp['data'])
+				req_data.columns = ['Date', 'Net Asset Value']
+				req_data['Date'] = pd.to_datetime(req_data['Date'],format='%d-%m-%Y')
+				req_data['Net Asset Value'] = req_data['Net Asset Value'].astype(float)
+				print('*************************************************************')
+				#print(type(end_date),type(start_date))
+				
+				downloaded_df = req_data[(req_data['Date']>=start_date) & (req_data['Date']<end_date)]
+				downloaded_df.sort_values(by='Date')
+				downloaded_df.set_index('Date',inplace= True)
+
 			table_df = downloaded_df.join(transactions_df)
+			table_df.sort_index(inplace=True)
+			#pdb.set_trace()
 			table_df['Amount Invested'] = table_df['Amount Invested'].fillna(0)
 			table_df['Amount Invested'] = table_df['Amount Invested'].astype('float')
 			#table_df['Scheme Code'] = table_df['Scheme Code'].astype('int')
@@ -103,15 +126,17 @@ def fundsvalue():
 		else:
 			if os.path.isfile(filepath):
 				table_df = pd.read_csv(filepath)
+				table_df['Date'] = pd.to_datetime(table_df['Date'],format='%Y-%m-%d')
 				table_df.set_index('Date',inplace=True)
 			else:
 				table_df = pd.DataFrame()
 		value_dictionary.update({Name:[table_df,short_name]})
 		Funds_df_list.append(table_df)
+		#pdb.set_trace()
 	return Funds_df_list,value_dictionary
 
 
-def debtsvalue():
+def debtsvalue(mode='Online'):
 	debttransactions = debts.objects.all()
 	#debt_df = pd.DataFrame(list(debttransactions))
 	
@@ -121,9 +146,9 @@ def debtsvalue():
 		Date,Total_Value,Total_Investment = [],[],[]
 		name = entry.comments
 		Amount = entry.Deposit_Amount
-		date = entry.start_date
+		date = pd.to_datetime(entry.start_date,format='%Y-%m-%d')
 		roi = entry.interest_rate/100
-		start_date = entry.start_date
+		start_date = pd.to_datetime(entry.start_date,format='%Y-%m-%d')
 		Date.append(date)
 		Total_Value.append(Amount)
 		r = relativedelta.relativedelta(today,start_date)
@@ -135,17 +160,16 @@ def debtsvalue():
 									'Amount Invested':Amount,
 									'Total Value':Total_Value,
 									})
-		#debts_df['Date'] = Date
-		#debts_df['Name'] = name
-		#debts_df['Amount Invested'] = Amount
-		#debts_df['Total Value'] = Total_Value
+		#debts_df['Date'] = pd.to_datetime(debts_df['Date'],format='%d-%m-%Y')
 		debts_df.set_index('Date',inplace=True)
+		debts_df.sort_index(inplace=True)
+		#pdb.set_trace()
 		debts_df_list.append(debts_df)
 
 	return debts_df_list
-def getSummary():
-	debts_df_list = debtsvalue()
-	Funds_df_list,value_dictionary = fundsvalue()
+def getSummary(mode='Online'):
+	debts_df_list = debtsvalue(mode)
+	Funds_df_list,value_dictionary = fundsvalue(mode)
 
 	def Summarize(listofframes,debts_df_list):
 	    x = 1
@@ -156,16 +180,28 @@ def getSummary():
 	        x += 1
 	    for chucko in debts_df_list:
 	    	TI = TI.join(chucko[['Amount Invested']],how = 'outer',rsuffix = str(x+1))
+	    	TI[TI.columns[-1]] = TI[TI.columns[-1]].astype(float)
 	    	TV = TV.join(chucko[['Total Value']],how = 'outer',rsuffix = str(x+1))
+	    	TV[TV.columns[-1]] = TV[TV.columns[-1]].astype(float)
 	    	x += 1
-
-
+	    #pdb.set_trace()
+	    TI.sort_index(inplace=True)
+	    TV.sort_index(inplace=True)
+	    TI.ffill(inplace=True)
+	    TV.ffill(inplace=True)
 	    TI.fillna(0,inplace = True)
 	    TV.fillna(0,inplace = True)
-	    Summary = pd.DataFrame(TI.sum(axis =1)).copy()
+	    TI.to_csv(os.path.join(settings.BASE_DIR,'TI_'+str(x)+'.csv'))
+	    TV.to_csv(os.path.join(settings.BASE_DIR,'TV_'+str(x)+'.csv'))
+	    Summary = pd.DataFrame(TI.sum(axis =1,numeric_only=True)).copy()
 	    Summary.columns = ['Overall Invested']
-	    Summary['Portfolio Value'] = pd.DataFrame(TV.sum(axis=1))
+	    Summary['Portfolio Value'] = pd.DataFrame(TV.sum(axis=1,numeric_only=True))
+	    lowval = min(Summary['Overall Invested'].min(),Summary['Portfolio Value'].min())
+	    highval = max(Summary['Overall Invested'].max(),Summary['Portfolio Value'].max())
+	    Summary['OI_Norm'] = (Summary['Overall Invested'] - lowval)/ (highval - lowval)
+	    Summary['PV_Norm'] = (Summary['Portfolio Value'] - lowval)/(highval - lowval)
 	    Summary['Abs Return'] = round((Summary['Portfolio Value']-Summary['Overall Invested'])/Summary['Overall Invested'],3)*100
+	    #pdb.set_trace()
 	    return Summary
 
 	return Summarize(Funds_df_list,debts_df_list),value_dictionary

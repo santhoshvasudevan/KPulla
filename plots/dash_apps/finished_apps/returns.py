@@ -30,8 +30,6 @@ def Summaryreturns(summary_df):
 
     fig = dict(data = data, layout = layout, font = font)
 
-
-
     app.layout = html.Div(style = {'backgroundColor':colors['background']} ,
                         children=[
                             html.H1(children='Portfolio Returns Chart',style = {'textAlign':'center','color':colors['text']}),

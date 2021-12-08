@@ -3,7 +3,7 @@ from .models import Funds_DB,Transactions,debts
 from django.contrib.auth.decorators import login_required
 from djangodash.decorators import unauthenticated_user,allowed_users
 from process.load_frames import debtsvalue,getSummary
-from plots.dash_apps.finished_apps.board import Summaryboard,Unitsboard
+from plots.dash_apps.finished_apps.board import NormSummaryboard,Summaryboard,Unitsboard
 from plots.dash_apps.finished_apps.returns import Summaryreturns,Unitsreturns
 
 # Create your views here.
@@ -14,9 +14,9 @@ def home(request):
 	'''
 	Make Shortnames 
 	'''
-
-	summary_df,value_dictionary = getSummary()
-	shortnames = ['board_'+value_dictionary[k][1] for k in value_dictionary]
+	summary_df,value_dictionary = getSummary(mode='Online')
+	shortnames = ['returns_'+value_dictionary[k][1] for k in value_dictionary]
+	NormSummaryboard(summary_df)
 	context = {'shortnames': shortnames}
 	return render(request,'plots/welcome2.html',context)
 
@@ -95,10 +95,10 @@ def transdebt(request):
 
 @login_required(login_url='login')
 def returns(request):
-	summary_df,value_dictionary = getSummary()
+	summary_df,value_dictionary = getSummary(mode='Offline')
 	shortnames = ['returns_'+value_dictionary[k][1] for k in value_dictionary]
-	#Summaryreturns()
-	#Unitsreturns()
+	Summaryreturns(summary_df)
+	Unitsreturns(value_dictionary)
 	context = {'shortnames': shortnames}
 	return render(request,'plots/returns.html',context)
 	
@@ -115,7 +115,10 @@ def ratios(request):
 
 @login_required(login_url='login')
 def rebalance(request):
-	return render(request,'plots/rebalance.html')
+	summary_df,value_dictionary = getSummary(mode='Offline')
+	shortnames = ['board_'+value_dictionary[k][1] for k in value_dictionary]
+	context = {'shortnames': shortnames}
+	return render(request,'plots/welcome3.html',context)
 
 
 def Filterview(request):

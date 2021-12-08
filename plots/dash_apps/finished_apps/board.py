@@ -12,6 +12,52 @@ colors = {
         'background' : '#111111',
         'text':'#7FDBFF'
         }
+
+def NormSummaryboard(summary_df):
+    #summary_df = load_frames.summary_df
+    app_n = DjangoDash('Nboard',external_stylesheets=external_stylesheets)
+
+    trace_n1 = go.Scatter(x = summary_df.index,
+                        y = summary_df['OI_Norm'],
+                        name = 'Invested Amount',
+                        )
+    trace_n2 = go.Scatter(x = summary_df.index,
+                        y = summary_df['PV_Norm'],
+                        name = 'Investment Value',
+                        )
+
+    ndata = [trace_n1,trace_n2]
+
+    layout_n = dict(title = 'Portfolio Chart',
+                    showlegend = True,
+                    plot_bgcolor = colors['background'],
+                    paper_bgcolor = colors['background'],
+                )
+    font = dict(color = colors['text'])
+
+    fig_n = dict(data = ndata, layout = layout_n, font = font)
+
+
+
+    app_n.layout = html.Div(style = {'backgroundColor':colors['background']} ,
+                        children=[
+                            html.H1(children='Portfolio Summary Chart',style = {'textAlign':'center','color':colors['text']}),
+
+                            # html.Div(children='''
+                            #                 Dash: A web application framework for Python.
+                            #                 Equity Investments summary graph
+                            #                     ''',
+                            #         style = {'textAlign':'center','color':colors['text']} ),
+
+                                    dcc.Graph(
+                                        id='main-graph',
+                                        figure= fig_n
+                                            )
+                                ]
+                        )
+
+
+
 def Summaryboard(summary_df):
     #summary_df = load_frames.summary_df
     app = DjangoDash('board',external_stylesheets=external_stylesheets)

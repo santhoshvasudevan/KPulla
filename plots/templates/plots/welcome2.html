@@ -8,13 +8,8 @@
 
 <h1>Home Page</h1>
 
-    <div class="{% plotly_class name='board' %} card" style="height: 100%; width: 100%">
-    {% plotly_app name='board' ratio=0.35 use_frameborder=1 %}
+    <div class="{% plotly_class name='Nboard' %} card" style="height: 100%; width: 100%">
+    {% plotly_app name='Nboard' ratio=0.35 use_frameborder=1 %}
     </div>
 
-{% for shname in shortnames %}
-    <div class="{% plotly_class name=shname %} card" style="height: 100%; width: 100%">
-    {% plotly_app name=shname ratio=0.53 use_frameborder=1 %}
-    </div>
-{% endfor %}
 {% endblock %}
